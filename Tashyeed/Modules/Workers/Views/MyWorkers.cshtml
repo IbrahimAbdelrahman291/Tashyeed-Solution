@@ -1,0 +1,124 @@
+﻿@model IEnumerable<WorkerListVM>
+@{
+    ViewData["Title"] = "العمال";
+}
+<div class="page-header">
+    <h2 class="page-title">العمال</h2>
+    <div style="display:flex; gap:12px;">
+        <a asp-controller="SupervisorDashboard" asp-action="Index" class="btn-action btn-edit">رجوع</a>
+        <a asp-action="AddWorker" class="btn-gold">+ إضافة عامل</a>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div style="background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.3);
+                    color: #4ade80; padding: 12px 20px; border-radius: 8px; margin-bottom: 16px;">
+        @TempData["Success"]
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);
+                    color: #f87171; padding: 12px 20px; border-radius: 8px; margin-bottom: 16px;">
+        @TempData["Error"]
+    </div>
+}
+
+<div class="dash-card">
+    <div style="gap:12px; padding: 16px 0 20px 0;">
+        <input type="text" id="searchInput" placeholder="ابحث باسم العامل..."
+               class="form-control-dash" style="max-width: 300px; height: 42px; display:inline-block; margin-left: 12px;"
+               onkeyup="filterTable()" />
+    </div>
+
+    <table class="dash-table" id="workersTable">
+        <thead>
+            <tr>
+                <th>الاسم</th>
+                <th>المشروع</th>
+                <th>النوع</th>
+                <th>سعر اليومية</th>
+                <th>سعر الأوفر تايم</th>
+                <th>الإجراءات</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            @foreach (var worker in Model)
+            {
+                <tr>
+                    <td>@worker.Name</td>
+                    <td>@worker.ProjectName</td>
+                    <td>
+                        @if (worker.Type == WorkerType.Daily)
+                        {
+                            <span class="badge-active">يومية</span>
+                        }
+                        else
+                        {
+                            <span class="badge-onhold">بالمشروع</span>
+                        }
+                    </td>
+                    <td>@worker.DailyRate.ToString("N2") SAR</td>
+                    <td>@worker.OvertimeHourRate.ToString("N2") SAR</td>
+                    <td>
+                        @if (worker.Type == WorkerType.Daily)
+                        {
+                            <a asp-action="AddAttendance"
+                               asp-route-workerId="@worker.Id"
+                               asp-route-workerName="@worker.Name"
+                               class="btn-action btn-details">حضور يومي</a>
+                            <a asp-action="PaymentSummary"
+                               asp-route-workerId="@worker.Id"
+                               class="btn-action btn-edit">صرف</a>
+                        }
+                        else
+                        {
+                            <a asp-action="MonthlyReport"
+                               asp-route-workerId="@worker.Id"
+                               asp-route-workerName="@worker.Name"
+                               class="btn-action btn-details">تقرير شهري</a>
+                        }
+                        <form asp-action="ToggleWorker" method="post" style="display:inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="workerId" value="@worker.Id" />
+                            <button type="submit" class="btn-action @(worker.IsActive ? "btn-delete" : "btn-edit")">
+                                @(worker.IsActive ? "إيقاف" : "تفعيل")
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <p id="noResults" style="display:none; color: var(--text-muted); padding: 20px; text-align:center;">
+        مفيش نتائج
+    </p>
+</div>
+
+<script>
+    function filterTable() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('#tableBody tr');
+        let count = 0;
+
+        rows.forEach(row => {
+            const name = row.cells[0].textContent.toLowerCase();
+            const matchSearch = !search || name.includes(search);
+
+            if (matchSearch) {
+                row.style.display = '';
+                count++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        document.getElementById('noResults').style.display = count === 0 ? 'block' : 'none';
+    }
+
+    function clearFilters() {
+        document.getElementById('searchInput').value = '';
+        filterTable();
+    }
+</script>

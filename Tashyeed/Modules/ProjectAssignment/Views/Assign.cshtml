@@ -1,0 +1,48 @@
+﻿@model AssignUserVM
+
+@{
+    ViewData["Title"] = "تعيين موظف";
+}
+
+<div class="page-header">
+    <h2 class="page-title">تعيين موظف على مشروع</h2>
+    <a asp-action="Index" class="btn-action btn-edit">رجوع</a>
+</div>
+
+<div class="form-card" style="margin: 0 auto;">
+    <form asp-action="Assign" method="post">
+        @Html.AntiForgeryToken()
+
+        <label class="form-label-dash">المشروع</label>
+        <select asp-for="ProjectId" class="form-control-dash" asp-items="ViewBag.Projects">
+            <option value="">-- اختر المشروع --</option>
+        </select>
+        <span asp-validation-for="ProjectId" class="text-danger-dash"></span>
+
+        <label class="form-label-dash">الموظف</label>
+        <select asp-for="UserId" class="form-control-dash" asp-items="ViewBag.Users" id="UserId">
+            <option value="">-- اختر الموظف --</option>
+        </select>
+        <span asp-validation-for="UserId" class="text-danger-dash"></span>
+
+        <label class="form-label-dash">الدور</label>
+        <input asp-for="Role" class="form-control-dash" readonly placeholder="هيتملى تلقائياً" />
+        <span asp-validation-for="Role" class="text-danger-dash"></span>
+
+        <div style="display:flex; gap:12px; margin-top:8px;">
+            <button type="submit" class="btn-gold">تعيين</button>
+            <a asp-action="Index" class="btn-action btn-edit">رجوع</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        const userRoles = @Html.Raw(Json.Serialize(ViewBag.UserRoles));
+
+        document.getElementById('UserId').addEventListener('change', function () {
+            const role = userRoles[this.value] ?? '';
+            document.getElementById('Role').value = role;
+        });
+    </script>
+}

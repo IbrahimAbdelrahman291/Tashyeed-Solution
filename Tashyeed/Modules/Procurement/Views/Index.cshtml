@@ -1,0 +1,152 @@
+﻿@model IEnumerable<ProcurementListVM>
+@{
+    ViewData["Title"] = "طلبات المشتريات";
+}
+<div class="page-header">
+    <h2 class="page-title">طلبات المشتريات</h2>
+    @if (User.IsInRole(RoleNames.ProcurementManager))
+    {
+        <a asp-controller="ProcurementManagerDashboard" asp-action="Index" class="btn-action btn-edit">رجوع</a>
+    }
+    else if (User.IsInRole(RoleNames.ProjectManager))
+    {
+        <a asp-controller="ProjectManagerDashboard" asp-action="Index" class="btn-action btn-edit">رجوع</a>
+    }
+    else
+    {
+        <a asp-controller="AdminDashboard" asp-action="Index" class="btn-action btn-edit">رجوع</a>
+    }
+</div>
+
+<div class="dash-card">
+    <div style="gap:12px; padding: 16px 0 20px 0;">
+        <input type="text" id="searchInput" placeholder="ابحث باسم الصنف..."
+               class="form-control-dash" style="max-width: 300px; height: 42px; display:inline-block; margin-left: 12px;"
+               onkeyup="filterTable()" />
+        <input type="date" id="dateFilter"
+               class="form-control-dash" style="max-width: 200px; height: 42px; display:inline-block; margin-left: 12px;"
+               onchange="filterTable()" />
+        <button onclick="clearFilters()"
+                style="background: transparent; border: 1px solid var(--border); color: var(--text-muted);
+                       height: 42px; padding: 0 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem;
+                       transition: all 0.2s;"
+                onmouseover="this.style.borderColor='var(--gold)'; this.style.color='var(--gold)'"
+                onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-muted)'">
+            ✕ مسح الفلتر
+        </button>
+    </div>
+
+    <table class="dash-table" id="procurementTable">
+        <thead>
+            <tr>
+                <th>المشروع</th>
+                <th>مقدم من</th>
+                <th>الصنف</th>
+                <th>الكمية</th>
+                <th>الوصف</th>
+                <th>الحالة</th>
+                <th>المبلغ</th>
+                <th>فاتورة</th>
+                <th>التاريخ</th>
+                <th>الإجراءات</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.ProjectName</td>
+                    <td>@item.RequestedByName</td>
+                    <td>@item.ItemName</td>
+                    <td>@item.Quantity</td>
+                    <td>@(item.Description ?? "-")</td>
+                    <td>
+                        @switch (item.Status)
+                        {
+                            case RequestStatus.Pending:
+                                <span class="badge-onhold">معلق</span>
+                                break;
+                            case RequestStatus.Approved:
+                                <span class="badge-active">تم الشراء</span>
+                                break;
+                            case RequestStatus.Rejected:
+                                <span class="badge-completed">مرفوض</span>
+                                break;
+                        }
+                    </td>
+                    <td>@(item.OrderAmount.HasValue? item.OrderAmount.Value.ToString("N2") + " SAR" : "-")</td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(item.InvoiceImagePath))
+                        {
+                            <a href="@item.InvoiceImagePath" target="_blank" class="btn-action btn-details">عرض</a>
+                        }
+                        else
+                        {
+                            <span style="color: var(--text-muted);">-</span>
+                        }
+                    </td>
+                    <td data-date="@item.CreatedAt.ToString("yyyy-MM-dd")">@item.CreatedAt.ToString("yyyy-MM-dd")</td>
+                    <td>
+                        @if (item.Status == RequestStatus.Pending && User.IsInRole(RoleNames.ProcurementManager))
+                        {
+                            <a asp-action="Order"
+                               asp-route-requestId="@item.Id"
+                               asp-route-projectId="@item.ProjectId"
+                               class="btn-action btn-details">تنفيذ</a>
+                        }
+                        else if (item.Status == RequestStatus.Approved && User.IsInRole(RoleNames.ProcurementManager))
+                        {
+                            <form asp-action="RevertOrder" method="post" style="display:inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="requestId" value="@item.Id" />
+                                <button type="submit" class="btn-action btn-delete"
+                                        onclick="return confirm('متأكد إنك عايز تلغي الشراء ده؟')">
+                                    إلغاء الشراء
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">-</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <p id="noResults" style="display:none; color: var(--text-muted); padding: 20px; text-align:center;">
+        مفيش نتائج
+    </p>
+</div>
+
+<script>
+    function filterTable() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const date = document.getElementById('dateFilter').value;
+        const rows = document.querySelectorAll('#tableBody tr');
+        let count = 0;
+
+        rows.forEach(row => {
+            const itemName = row.cells[2].textContent.toLowerCase();
+            const rowDate = row.cells[8].getAttribute('data-date');
+
+            const matchSearch = !search || itemName.includes(search);
+            const matchDate = !date || rowDate === date;
+
+            if (matchSearch && matchDate) {
+                row.style.display = '';
+                count++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        document.getElementById('noResults').style.display = count === 0 ? 'block' : 'none';
+    }
+
+    function clearFilters() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('dateFilter').value = '';
+        filterTable();
+    }
+</script>

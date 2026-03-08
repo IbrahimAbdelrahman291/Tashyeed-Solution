@@ -1,0 +1,107 @@
+﻿@model IEnumerable<UserListVM>
+@{
+    ViewData["Title"] = "المستخدمين";
+}
+<div class="page-header">
+    <h2 class="page-title">المستخدمين</h2>
+    <div style="display:flex; gap:12px;">
+        <a asp-controller="AdminDashboard" asp-action="Index" class="btn-action btn-edit">رجوع</a>
+        <a asp-action="Create" class="btn-gold">+ مستخدم جديد</a>
+    </div>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);
+                    color: #f87171; padding: 12px 20px; border-radius: 8px; margin-bottom: 16px;">
+        @TempData["Error"]
+    </div>
+}
+
+<div class="dash-card">
+    <div style="padding: 16px 0 20px 0;">
+        <input type="text" id="searchInput" placeholder="ابحث بالاسم أو البريد الإلكتروني..."
+               class="form-control-dash" style="max-width: 400px;"
+               onkeyup="filterTable()" />
+    </div>
+    <table class="dash-table" id="usersTable">
+        <thead>
+            <tr>
+                <th>الاسم</th>
+                <th>البريد الإلكتروني</th>
+                <th>الجوال</th>
+                <th>الدور</th>
+                <th>الحالة</th>
+                <th>تاريخ الإنشاء</th>
+                <th>الإجراءات</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>@user.FullName</td>
+                    <td>@user.Email</td>
+                    <td>@(user.Phone ?? "-")</td>
+                    <td>@user.Role</td>
+                    <td>
+                        @if (user.IsActive)
+                        {
+                            <span class="badge-active">نشط</span>
+                        }
+                        else
+                        {
+                            <span class="badge-completed">غير نشط</span>
+                        }
+                    </td>
+                    <td>@user.CreatedAt.ToString("yyyy-MM-dd")</td>
+                    <td>
+                        <form asp-action="ToggleStatus" method="post" style="display:inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="userId" value="@user.Id" />
+                            <button type="submit" class="btn-action @(user.IsActive ? "btn-delete" : "btn-details")">
+                                @(user.IsActive ? "تعطيل" : "تفعيل")
+                            </button>
+                        </form>
+                        <a asp-action="ChangePassword" asp-route-userId="@user.Id"
+                           class="btn-action btn-edit">
+                            🔑 تعديل الباسورد
+                        </a>
+                        <form asp-action="Delete" method="post" style="display:inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="userId" value="@user.Id" />
+                            <button type="submit" class="btn-action btn-delete"
+                                    onclick="return confirm('متأكد إنك عايز تمسح الموظف ده نهائياً؟')">
+                                حذف
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <p id="noResults" style="display:none; color: var(--text-muted); padding: 20px; text-align:center;">
+        مفيش نتائج
+    </p>
+</div>
+
+<script>
+    function filterTable() {
+        const input = document.getElementById('searchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('#tableBody tr');
+        let count = 0;
+
+        rows.forEach(row => {
+            const name = row.cells[0].textContent.toLowerCase();
+            const email = row.cells[1].textContent.toLowerCase();
+            if (name.includes(input) || email.includes(input)) {
+                row.style.display = '';
+                count++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        document.getElementById('noResults').style.display = count === 0 ? 'block' : 'none';
+    }
+</script>

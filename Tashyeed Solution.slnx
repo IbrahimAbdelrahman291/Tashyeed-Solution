@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="Tashyeed.Infrastructure/Tashyeed.Infrastructure.csproj" Id="aa6db615-3e87-43d5-8af4-9dd40be15e29" />
+    <Project Path="Tashyeed.Shared/Tashyeed.Shared.csproj" Id="9059d135-e465-45dd-b6a5-b47e5a83149f" />
+    <Project Path="Tashyeed/Tashyeed.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+</Solution>

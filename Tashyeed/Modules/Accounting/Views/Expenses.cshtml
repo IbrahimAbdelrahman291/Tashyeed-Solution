@@ -1,0 +1,118 @@
+﻿@model IEnumerable<Tashyeed.Infrastructure.Entities.Expense>
+@{
+    ViewData["Title"] = "المصاريف";
+}
+<div class="page-header">
+    <h2 class="page-title">المصاريف</h2>
+    <a asp-controller="AccountingManagerDashboard" asp-action="Index" class="btn-action btn-edit">رجوع</a>
+</div>
+<div class="dash-card">
+    <div style="gap:12px; padding: 16px 0 20px 0;">
+        <select id="monthFilter" class="form-control-dash" style="max-width: 160px; height: 42px; display:inline-block; margin-left: 12px;" onchange="filterTable()">
+            <option value="">كل الشهور</option>
+            <option value="01">يناير</option>
+            <option value="02">فبراير</option>
+            <option value="03">مارس</option>
+            <option value="04">أبريل</option>
+            <option value="05">مايو</option>
+            <option value="06">يونيو</option>
+            <option value="07">يوليو</option>
+            <option value="08">أغسطس</option>
+            <option value="09">سبتمبر</option>
+            <option value="10">أكتوبر</option>
+            <option value="11">نوفمبر</option>
+            <option value="12">ديسمبر</option>
+        </select>
+        <input type="number" id="yearFilter" placeholder="السنة" min="2000" max="2099"
+               class="form-control-dash" style="max-width: 120px; height: 42px; display:inline-block; margin-left: 12px;"
+               onkeyup="filterTable()" onchange="filterTable()" />
+        <button onclick="clearFilters()" style="background: transparent; border: 1px solid var(--border); color: var(--text-muted); height: 42px; padding: 0 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s;"
+                onmouseover="this.style.borderColor='var(--gold)'; this.style.color='var(--gold)'"
+                onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-muted)'">
+            ✕ مسح الفلتر
+        </button>
+    </div>
+    <table class="dash-table">
+        <thead>
+            <tr>
+                <th>المشروع</th>
+                <th>مقدم من</th>
+                <th>النوع</th>
+                <th>المبلغ</th>
+                <th>فاتورة</th>
+                <th>الحالة</th>
+                <th>التاريخ</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            @foreach (var expense in Model)
+            {
+                <tr>
+                    <td>@expense.Project.Name</td>
+                    <td>@(expense.SubmittedBy.FullName ?? expense.SubmittedBy.Email)</td>
+                    <td>@if (expense.Type == Tashyeed.Shared.Enums.ExpenseType.Food) {
+                    <span>🍔 أكل وشرب</span>
+                } else
+                {
+
+                    <span>🚗 موصلات</span>
+                }
+</td>
+                <td>@expense.Amount.ToString("N2") SAR</td>
+                <td>
+                    @if (!string.IsNullOrEmpty(expense.InvoiceImagePath))
+                    {
+                        <a href="@expense.InvoiceImagePath" target="_blank" class="btn-action btn-details">عرض</a>
+                    }
+                    else
+                    {
+
+                        <span style="color: var(--text-muted);">-</span>
+                    }
+                </td>
+                <td>
+                    @switch (expense.Status)
+                    {
+                        case Tashyeed.Shared.Enums.RequestStatus.Pending:
+                            <span class="badge-onhold">معلقة</span>
+                            break;
+                        case Tashyeed.Shared.Enums.RequestStatus.Approved:
+
+                            <span class="badge-active">موافق عليها</span>
+                            break;
+                        case Tashyeed.Shared.Enums.RequestStatus.Rejected:
+
+                            <span class="badge-completed">مرفوضة</span>
+                            break;
+                    }
+                </td>
+                <td data-date="@expense.CreatedAt.ToString("yyyy-MM-dd")">@expense.CreatedAt.ToString("yyyy-MM-dd")</td>
+            </tr>
+                        }
+        </tbody>
+    </table>
+    <p id="noResults" style="display:none; color: var(--text-muted); padding: 20px; text-align:center;">مفيش نتائج</p>
+</div>
+<script>
+    function filterTable() {
+        const month = document.getElementById('monthFilter').value;
+        const year = document.getElementById('yearFilter').value;
+        const rows = document.querySelectorAll('#tableBody tr');
+        let count = 0;
+        rows.forEach(row => {
+            const rowDate = row.cells[6].getAttribute('data-date');
+            const rowMonth = rowDate ? rowDate.substring(5, 7) : '';
+            const rowYear = rowDate ? rowDate.substring(0, 4) : '';
+            const matchMonth = !month || rowMonth === month;
+            const matchYear = !year || rowYear === year;
+            if (matchMonth && matchYear) { row.style.display = ''; count++; }
+            else row.style.display = 'none';
+        });
+        document.getElementById('noResults').style.display = count === 0 ? 'block' : 'none';
+    }
+    function clearFilters() {
+        document.getElementById('monthFilter').value = '';
+        document.getElementById('yearFilter').value = '';
+        filterTable();
+    }
+</script>

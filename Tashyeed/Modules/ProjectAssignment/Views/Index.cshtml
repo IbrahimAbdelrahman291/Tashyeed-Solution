@@ -1,0 +1,75 @@
+﻿@model IEnumerable<ProjectAssignmentListVM>
+@{
+    ViewData["Title"] = "تعيينات المشاريع";
+}
+<div class="page-header">
+    <h2 class="page-title">تعيينات المشاريع</h2>
+    <div style="display:flex; gap:12px;">
+        <a asp-controller="AdminDashboard" asp-action="Index" class="btn-action btn-edit">رجوع</a>
+        <a asp-action="Assign" class="btn-gold">+ تعيين موظف</a>
+    </div>
+</div>
+
+<div class="dash-card">
+    <div style="padding: 16px 0 20px 0;">
+        <input type="text" id="searchInput" placeholder="ابحث باسم الموظف أو المشروع..."
+               class="form-control-dash" style="max-width: 400px;"
+               onkeyup="filterTable()" />
+    </div>
+    <table class="dash-table" id="assignTable">
+        <thead>
+            <tr>
+                <th>المشروع</th>
+                <th>الموظف</th>
+                <th>الدور</th>
+                <th>تاريخ التعيين</th>
+                <th>الإجراءات</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            @foreach (var assignment in Model)
+            {
+                <tr>
+                    <td>@assignment.ProjectName</td>
+                    <td>@assignment.UserName</td>
+                    <td>@assignment.Role</td>
+                    <td>@assignment.AssignedAt.ToString("yyyy-MM-dd")</td>
+                    <td>
+                        <form asp-action="Remove" method="post" style="display:inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="assignmentId" value="@assignment.Id" />
+                            <button type="submit" class="btn-action btn-delete"
+                                    onclick="return confirm('متأكد إنك عايز تشيل التعيين ده؟')">
+                                إلغاء التعيين
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <p id="noResults" style="display:none; color: var(--text-muted); padding: 20px; text-align:center;">
+        مفيش نتائج
+    </p>
+</div>
+
+<script>
+    function filterTable() {
+        const input = document.getElementById('searchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('#tableBody tr');
+        let count = 0;
+
+        rows.forEach(row => {
+            const project = row.cells[0].textContent.toLowerCase();
+            const user = row.cells[1].textContent.toLowerCase();
+            if (project.includes(input) || user.includes(input)) {
+                row.style.display = '';
+                count++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        document.getElementById('noResults').style.display = count === 0 ? 'block' : 'none';
+    }
+</script>

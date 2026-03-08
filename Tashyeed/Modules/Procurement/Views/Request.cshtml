@@ -1,0 +1,42 @@
+﻿@model PurchaseRequestVM
+
+@{
+    ViewData["Title"] = "طلب شراء جديد";
+}
+
+<div class="page-header">
+    <h2 class="page-title">طلب شراء جديد</h2>
+    <a asp-action="MyRequests" class="btn-action btn-edit">رجوع</a>
+</div>
+
+<div class="form-card" style="margin: 0 auto;">
+    <form asp-action="Request" method="post">
+        @Html.AntiForgeryToken()
+
+        <label class="form-label-dash">المشروع</label>
+        <select asp-for="ProjectId" class="form-control-dash" asp-items="ViewBag.Projects">
+            <option value="">-- اختر المشروع --</option>
+        </select>
+        <span asp-validation-for="ProjectId" class="text-danger-dash"></span>
+
+        <label class="form-label-dash">اسم الصنف</label>
+        <input asp-for="ItemName" class="form-control-dash" placeholder="مثال: أكياس سمنت" />
+        <span asp-validation-for="ItemName" class="text-danger-dash"></span>
+
+        <label class="form-label-dash">الكمية</label>
+        <input asp-for="Quantity" class="form-control-dash" type="number" min="1" placeholder="0" />
+        <span asp-validation-for="Quantity" class="text-danger-dash"></span>
+
+        <label class="form-label-dash">الوصف (اختياري)</label>
+        <textarea asp-for="Description" class="form-control-dash" rows="2" placeholder="أي تفاصيل إضافية"></textarea>
+
+        <div style="display:flex; gap:12px; margin-top:8px;">
+            <button type="submit" class="btn-gold">إرسال الطلب</button>
+            <a asp-action="MyRequests" class="btn-action btn-edit">رجوع</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

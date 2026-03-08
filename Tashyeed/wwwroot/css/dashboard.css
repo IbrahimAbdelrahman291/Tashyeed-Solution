@@ -1,0 +1,287 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+    --navy: #0B1F3A;
+    --navy-mid: #122647;
+    --navy-light: #1A3560;
+    --gold: #C9A84C;
+    --gold-light: #E8C96A;
+    --gold-dim: #8A6E2F;
+    --off-white: #F5F0E8;
+    --text-muted: #8A9BB5;
+    --white: #FFFFFF;
+    --card-bg: #0F2A4A;
+    --border: rgba(201,168,76,0.2);
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    background-color: var(--navy);
+    color: var(--white);
+    direction: rtl;
+}
+
+/* ── NAVBAR ── */
+.dash-navbar {
+    background: var(--navy-mid);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dash-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--white);
+    text-decoration: none;
+}
+
+    .dash-brand em {
+        font-style: normal;
+        color: var(--gold);
+    }
+
+.btn-logout {
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 8px 20px;
+    border: 1.5px solid var(--gold);
+    color: var(--gold);
+    background: transparent;
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .btn-logout:hover {
+        background: var(--gold);
+        color: var(--navy);
+    }
+
+/* ── LAYOUT ── */
+.dash-wrapper {
+    padding: 32px;
+    min-height: 100vh;
+}
+
+/* ── PAGE HEADER ── */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--white);
+}
+
+.btn-gold {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 10px 24px;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+    color: var(--navy);
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(201,168,76,0.3);
+}
+
+    .btn-gold:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(201,168,76,0.45);
+        color: var(--navy);
+    }
+
+/* ── TABLE ── */
+.form-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 36px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.dash-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .dash-table thead {
+        background: var(--navy-light);
+    }
+
+    .dash-table th {
+        padding: 14px 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--gold);
+        text-align: right;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .dash-table td {
+        padding: 16px 20px;
+        font-size: 0.9rem;
+        color: var(--white);
+        border-bottom: 1px solid rgba(201,168,76,0.07);
+        text-align: right;
+    }
+
+    .dash-table tbody tr {
+        transition: background 0.2s ease;
+    }
+
+        .dash-table tbody tr:hover {
+            background: rgba(201,168,76,0.04);
+        }
+
+/* ── BADGES ── */
+.badge-active {
+    padding: 4px 12px;
+    background: rgba(40,200,100,0.15);
+    color: #4ade80;
+    border-radius: 20px;
+    border: 1px solid rgba(40,200,100,0.3);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.badge-onhold {
+    padding: 4px 12px;
+    background: rgba(201,168,76,0.15);
+    color: var(--gold);
+    border-radius: 20px;
+    border: 1px solid rgba(201,168,76,0.3);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.badge-completed {
+    padding: 4px 12px;
+    background: rgba(138,155,181,0.15);
+    color: var(--text-muted);
+    border-radius: 20px;
+    border: 1px solid rgba(138,155,181,0.3);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+/* ── ACTION BUTTONS ── */
+.btn-action {
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    margin-left: 6px;
+}
+
+.btn-details {
+    background: rgba(201,168,76,0.1);
+    color: var(--gold);
+    border: 1px solid rgba(201,168,76,0.3);
+}
+
+    .btn-details:hover {
+        background: var(--gold);
+        color: var(--navy);
+    }
+
+.btn-edit {
+    background: rgba(59,130,246,0.1);
+    color: #60a5fa;
+    border: 1px solid rgba(59,130,246,0.3);
+}
+
+    .btn-edit:hover {
+        background: #3b82f6;
+        color: var(--white);
+    }
+
+.btn-delete {
+    background: rgba(239,68,68,0.1);
+    color: #f87171;
+    border: 1px solid rgba(239,68,68,0.3);
+}
+
+    .btn-delete:hover {
+        background: #ef4444;
+        color: var(--white);
+    }
+
+/* ── FORM ── */
+.form-control-dash option {
+    background: var(--navy-mid);
+    color: var(--white);
+    padding: 8px;
+}
+.form-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 36px;
+    max-width: 600px;
+}
+
+.form-label-dash {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.form-control-dash {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.04);
+    border: 1.5px solid rgba(201,168,76,0.15);
+    border-radius: 8px;
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+}
+
+    .form-control-dash:focus {
+        border-color: var(--gold);
+        background: rgba(201,168,76,0.05);
+        box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+    }
+
+    .form-control-dash::placeholder {
+        color: rgba(138,155,181,0.5);
+    }
+
+.text-danger-dash {
+    font-size: 0.8rem;
+    color: #f87171;
+    margin-top: -16px;
+    margin-bottom: 12px;
+    display: block;
+}

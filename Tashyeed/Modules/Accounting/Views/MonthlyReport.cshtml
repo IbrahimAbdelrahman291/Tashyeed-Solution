@@ -1,0 +1,196 @@
+﻿@{
+    ViewData["Title"] = "التقرير الشهري";
+}
+
+<div class="page-header">
+    <h2 class="page-title">التقرير الشهري</h2>
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-controller="AdminDashboard" asp-action="Index" class="btn-action btn-edit">رجوع</a>
+    }
+    else
+    {
+        <a asp-controller="AccountingManagerDashboard" asp-action="Index" class="btn-action btn-edit">رجوع</a>
+    }
+</div>
+
+<!-- فورم الفلترة -->
+<div class="dash-card" style="padding: 24px; margin-bottom: 24px;">
+    <div style="gap: 12px;">
+        <select id="reportType" class="form-control-dash"
+                style="max-width: 200px; height: 42px; display:inline-block; margin-left: 12px;"
+                onchange="toggleProjectSelect()">
+            <option value="full">تقرير شامل</option>
+            <option value="single">مشروع معين</option>
+        </select>
+
+        <select id="projectSelect" class="form-control-dash"
+                style="max-width: 200px; height: 42px; display:none; margin-left: 12px;">
+            @foreach (var project in ViewBag.Projects)
+            {
+                <option value="@project.Id">@project.Name</option>
+            }
+        </select>
+
+        <select id="monthFilter" class="form-control-dash"
+                style="max-width: 160px; height: 42px; display:inline-block; margin-left: 12px;">
+            <option value="1">يناير</option>
+            <option value="2">فبراير</option>
+            <option value="3">مارس</option>
+            <option value="4">أبريل</option>
+            <option value="5">مايو</option>
+            <option value="6">يونيو</option>
+            <option value="7">يوليو</option>
+            <option value="8">أغسطس</option>
+            <option value="9">سبتمبر</option>
+            <option value="10">أكتوبر</option>
+            <option value="11">نوفمبر</option>
+            <option value="12">ديسمبر</option>
+        </select>
+
+        <input type="number" id="yearFilter" placeholder="السنة" value="@DateTime.Now.Year"
+               class="form-control-dash"
+               style="max-width: 120px; height: 42px; display:inline-block; margin-left: 12px;" />
+
+        <button onclick="loadReport()"
+                style="background: var(--gold); color: #000; height: 42px; padding: 0 20px;
+                       border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 0.9rem;
+                       display:inline-block;">
+            عرض التقرير
+        </button>
+    </div>
+</div>
+
+<!-- التقرير -->
+<div id="reportContainer" style="display:none;">
+    <div class="dash-card" style="padding: 24px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+            <h3 id="reportTitle" style="color: var(--white); font-size: 1.1rem;"></h3>
+            <button onclick="exportToExcel()"
+                    style="background: #1d6f42; color: #fff; height: 38px; padding: 0 16px;
+                           border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 0.85rem;">
+                📥 تحميل Excel
+            </button>
+        </div>
+        <div id="reportContent"></div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+    function toggleProjectSelect() {
+        const type = document.getElementById('reportType').value;
+        const projectSelect = document.getElementById('projectSelect');
+        projectSelect.style.display = type === 'single' ? 'inline-block' : 'none';
+    }
+
+    async function loadReport() {
+        const type = document.getElementById('reportType').value;
+        const month = document.getElementById('monthFilter').value;
+        const year = document.getElementById('yearFilter').value;
+        const projectId = document.getElementById('projectSelect').value;
+
+        if (!year) { alert('من فضلك ادخل السنة'); return; }
+
+        let url = type === 'single'
+            ? `/Accounting/GetProjectReport?projectId=${projectId}&month=${month}&year=${year}`
+            : `/Accounting/GetFullReport?month=${month}&year=${year}`;
+
+        const res = await fetch(url);
+        const data = await res.json();
+
+        renderReport(data, type);
+        document.getElementById('reportContainer').style.display = 'block';
+    }
+
+    function renderReport(data, type) {
+        const monthName = document.getElementById('monthFilter').selectedOptions[0].text;
+        const year = document.getElementById('yearFilter').value;
+
+        if (type === 'single') {
+            document.getElementById('reportTitle').textContent =
+                `تقرير ${data.projectName} - ${monthName} ${year}`;
+            document.getElementById('reportContent').innerHTML = renderSingleProject(data);
+        } else {
+            document.getElementById('reportTitle').textContent =
+                `التقرير الشامل - ${monthName} ${year}`;
+            document.getElementById('reportContent').innerHTML = renderFullReport(data);
+        }
+    }
+
+    function renderSingleProject(data) {
+        return `
+            <table class="dash-table" id="exportTable">
+                <thead>
+                    <tr>
+                        <th>البند</th>
+                        <th>المبلغ (SAR)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>الميزانية</td><td>${fmt(data.budget)}</td></tr>
+                    <tr><td>إجمالي العهد</td><td>${fmt(data.custodiesTotal)}</td></tr>
+                    <tr><td>إجمالي المصاريف</td><td>${fmt(data.expensesTotal)}</td></tr>
+                    <tr><td>إجمالي المشتريات</td><td>${fmt(data.procurementTotal)}</td></tr>
+                    <tr><td>إجمالي العمالة</td><td>${fmt(data.workersTotal)}</td></tr>
+                    <tr style="font-weight:700; color: var(--gold);">
+                        <td>الإجمالي الكلي المصروف</td>
+                        <td>${fmt(data.grandTotal)}</td>
+                    </tr>
+                    <tr style="color: #4ade80;">
+                        <td>المتبقي من الميزانية</td>
+                        <td>${fmt(data.remaining)}</td>
+                    </tr>
+                </tbody>
+            </table>`;
+    }
+
+    function renderFullReport(data) {
+        let rows = data.projects.map(p => `
+            <tr>
+                <td>${p.name}</td>
+                <td>${fmt(p.budget)}</td>
+                <td>${fmt(p.custodiesTotal)}</td>
+                <td>${fmt(p.expensesTotal)}</td>
+                <td>${fmt(p.procurementTotal)}</td>
+                <td>${fmt(p.workersTotal)}</td>
+                <td>${fmt(p.grandTotal)}</td>
+            </tr>`).join('');
+
+        return `
+            <table class="dash-table" id="exportTable">
+                <thead>
+                    <tr>
+                        <th>المشروع</th>
+                        <th>الميزانية</th>
+                        <th>العهد</th>
+                        <th>المصاريف</th>
+                        <th>المشتريات</th>
+                        <th>العمالة</th>
+                        <th>الإجمالي المصروف</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rows}
+                    <tr style="font-weight:700; color: var(--gold);">
+                        <td>الإجمالي الكلي</td>
+                        <td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>
+                        <td>${fmt(data.grandTotal)}</td>
+                    </tr>
+                </tbody>
+            </table>`;
+    }
+
+    function fmt(val) {
+        return Number(val).toLocaleString('en', { minimumFractionDigits: 2 }) + ' SAR';
+    }
+
+    function exportToExcel() {
+        const table = document.getElementById('exportTable');
+        const title = document.getElementById('reportTitle').textContent;
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.table_to_sheet(table);
+        XLSX.utils.book_append_sheet(wb, ws, "التقرير");
+        XLSX.writeFile(wb, `${title}.xlsx`);
+    }
+</script>

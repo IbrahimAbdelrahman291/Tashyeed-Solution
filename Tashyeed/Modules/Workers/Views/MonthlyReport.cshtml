@@ -1,0 +1,54 @@
+﻿@model MonthlyReportVM
+
+@{
+    ViewData["Title"] = "التقرير الشهري";
+}
+
+<div class="page-header">
+    <h2 class="page-title">التقرير الشهري - @Model.WorkerName</h2>
+    <a asp-action="MyWorkers" class="btn-action btn-edit">رجوع</a>
+</div>
+
+<div class="form-card" style="margin: 0 auto;">
+    <form asp-action="MonthlyReport" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="WorkerId" />
+        <input type="hidden" asp-for="WorkerName" />
+
+        <label class="form-label-dash">الشهر</label>
+        <select asp-for="Month" class="form-control-dash">
+            <option value="1">يناير</option>
+            <option value="2">فبراير</option>
+            <option value="3">مارس</option>
+            <option value="4">أبريل</option>
+            <option value="5">مايو</option>
+            <option value="6">يونيو</option>
+            <option value="7">يوليو</option>
+            <option value="8">أغسطس</option>
+            <option value="9">سبتمبر</option>
+            <option value="10">أكتوبر</option>
+            <option value="11">نوفمبر</option>
+            <option value="12">ديسمبر</option>
+        </select>
+
+        <label class="form-label-dash">السنة</label>
+        <input asp-for="Year" class="form-control-dash" type="number" />
+
+        <label class="form-label-dash">ساعات الأوفر تايم</label>
+        <input asp-for="OvertimeHours" class="form-control-dash" type="number" step="0.5" min="0" placeholder="0" />
+        <span asp-validation-for="OvertimeHours" class="text-danger-dash"></span>
+
+        <label class="form-label-dash">ملاحظات (اختياري)</label>
+        <textarea asp-for="Notes" class="form-control-dash" rows="3"
+                  placeholder="أي ملاحظات على العامل ده"></textarea>
+
+        <div style="display:flex; gap:12px; margin-top:8px;">
+            <button type="submit" class="btn-gold">حفظ</button>
+            <a asp-action="MyWorkers" class="btn-action btn-edit">رجوع</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

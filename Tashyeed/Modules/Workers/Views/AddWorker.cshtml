@@ -1,0 +1,51 @@
+﻿@model AddWorkerVM
+
+@{
+    ViewData["Title"] = "إضافة عامل";
+}
+
+<div class="page-header">
+    <h2 class="page-title">إضافة عامل جديد</h2>
+    <a asp-action="MyWorkers" class="btn-action btn-edit">رجوع</a>
+</div>
+
+<div class="form-card" style="margin: 0 auto;">
+    <form asp-action="AddWorker" method="post">
+        @Html.AntiForgeryToken()
+
+        <label class="form-label-dash">المشروع</label>
+        <select asp-for="ProjectId" class="form-control-dash" asp-items="ViewBag.Projects">
+            <option value="">-- اختر المشروع --</option>
+        </select>
+        <span asp-validation-for="ProjectId" class="text-danger-dash"></span>
+
+        <label class="form-label-dash">اسم العامل</label>
+        <input asp-for="Name" class="form-control-dash" placeholder="اسم العامل كامل" />
+        <span asp-validation-for="Name" class="text-danger-dash"></span>
+
+        <label class="form-label-dash">نوع العامل</label>
+        <select asp-for="Type" class="form-control-dash">
+            <option value="">-- اختر النوع --</option>
+            <option value="1">يومية</option>
+            <option value="2">بالمشروع</option>
+        </select>
+        <span asp-validation-for="Type" class="text-danger-dash"></span>
+
+        <label class="form-label-dash">سعر اليومية (SAR)</label>
+        <input asp-for="DailyRate" class="form-control-dash" type="number" step="0.01" placeholder="0.00" />
+        <span asp-validation-for="DailyRate" class="text-danger-dash"></span>
+
+        <label class="form-label-dash">سعر ساعة الأوفر تايم (SAR)</label>
+        <input asp-for="OvertimeHourRate" class="form-control-dash" type="number" step="0.01" placeholder="0.00" />
+        <span asp-validation-for="OvertimeHourRate" class="text-danger-dash"></span>
+
+        <div style="display:flex; gap:12px; margin-top:8px;">
+            <button type="submit" class="btn-gold">إضافة</button>
+            <a asp-action="MyWorkers" class="btn-action btn-edit">رجوع</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

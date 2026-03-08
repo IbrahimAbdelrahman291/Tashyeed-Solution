@@ -1,0 +1,74 @@
+﻿@model ProjectDetailsVM
+
+@{
+    ViewData["Title"] = "تفاصيل المشروع";
+}
+
+<div class="page-header">
+    <h2 class="page-title">@Model.Name</h2>
+    <a asp-action="Index" class="btn-action btn-edit">رجوع</a>
+</div>
+
+<div class="form-card" style="max-width: 700px; margin: 0 auto;">
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+        <div>
+            <span class="form-label-dash">الموقع</span>
+            <p style="color: var(--white); font-size: 0.95rem;">@Model.Location</p>
+        </div>
+        <div>
+            <span class="form-label-dash">الحالة</span>
+            <p>
+                @switch (Model.Status)
+                {
+                    case Tashyeed.Shared.Enums.ProjectStatus.Active:
+                        <span class="badge-active">نشط</span>
+                        break;
+                    case Tashyeed.Shared.Enums.ProjectStatus.OnHold:
+                        <span class="badge-onhold">معلق</span>
+                        break;
+                    case Tashyeed.Shared.Enums.ProjectStatus.Completed:
+                        <span class="badge-completed">منتهي</span>
+                        break;
+                }
+            </p>
+        </div>
+        <div>
+            <span class="form-label-dash">الميزانية</span>
+            <p style="color: var(--gold); font-size: 1.1rem; font-weight: 600;">@Model.Budget.ToString("N2") SAR</p>
+        </div>
+        <div>
+            <span class="form-label-dash">المصروف</span>
+            <p style="color: #f87171; font-size: 1.1rem; font-weight: 600;">@Model.SpentAmount.ToString("N2") SAR</p>
+        </div>
+        <div>
+            <span class="form-label-dash">المتبقي</span>
+            <p style="color: #4ade80; font-size: 1.1rem; font-weight: 600;">@Model.RemainingBudget.ToString("N2") SAR</p>
+        </div>
+        <div>
+            <span class="form-label-dash">تاريخ البداية</span>
+            <p style="color: var(--white);">@Model.StartDate.ToString("yyyy-MM-dd")</p>
+        </div>
+        <div>
+            <span class="form-label-dash">تاريخ النهاية</span>
+            <p style="color: var(--white);">@(Model.EndDate?.ToString("yyyy-MM-dd") ?? "-")</p>
+        </div>
+        <div>
+            <span class="form-label-dash">تاريخ الإنشاء</span>
+            <p style="color: var(--white);">@Model.CreatedAt.ToString("yyyy-MM-dd")</p>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.Description))
+    {
+        <div style="margin-bottom: 24px;">
+            <span class="form-label-dash">الوصف</span>
+            <p style="color: var(--text-muted); line-height: 1.7;">@Model.Description</p>
+        </div>
+    }
+
+    <div style="display:flex; gap:12px;">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-gold">تعديل</a>
+        <a asp-action="Index" class="btn-action btn-edit">رجوع</a>
+    </div>
+</div>

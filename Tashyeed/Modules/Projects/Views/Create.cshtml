@@ -1,0 +1,47 @@
+﻿@model CreateProjectVM
+
+@{
+    ViewData["Title"] = "مشروع جديد";
+}
+
+<div class="page-header">
+    <h2 class="page-title">مشروع جديد</h2>
+    <a asp-action="Index" class="btn-action btn-edit">رجوع</a>
+</div>
+
+<div class="form-card">
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+
+        <label class="form-label-dash">اسم المشروع</label>
+        <input asp-for="Name" class="form-control-dash" placeholder="مثال: مشروع مكة" />
+        <span asp-validation-for="Name" class="text-danger-dash"></span>
+
+        <label class="form-label-dash">الوصف</label>
+        <textarea asp-for="Description" class="form-control-dash" rows="3" placeholder="وصف المشروع (اختياري)"></textarea>
+
+        <label class="form-label-dash">الموقع</label>
+        <input asp-for="Location" class="form-control-dash" placeholder="مثال: مكة المكرمة" />
+        <span asp-validation-for="Location" class="text-danger-dash"></span>
+
+        <label class="form-label-dash">الميزانية</label>
+        <input asp-for="Budget" class="form-control-dash" type="number" step="0.01" placeholder="0.00" />
+        <span asp-validation-for="Budget" class="text-danger-dash"></span>
+
+        <label class="form-label-dash">تاريخ البداية</label>
+        <input asp-for="StartDate" class="form-control-dash" type="date" />
+        <span asp-validation-for="StartDate" class="text-danger-dash"></span>
+
+        <label class="form-label-dash">تاريخ النهاية (اختياري)</label>
+        <input asp-for="EndDate" class="form-control-dash" type="date" />
+
+        <div style="display:flex; gap:12px; margin-top:8px;">
+            <button type="submit" class="btn-gold">حفظ</button>
+            <a asp-action="Index" class="btn-action btn-edit">رجوع</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

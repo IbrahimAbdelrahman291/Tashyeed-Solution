@@ -1,0 +1,54 @@
+﻿@model AssignCustodyVM
+@{
+    ViewData["Title"] = "عهدة جديدة";
+}
+
+<div class="page-header">
+    <h2 class="page-title">إضافة عهدة جديدة</h2>
+    @if (!string.IsNullOrEmpty(ViewBag.ReturnUrl as string))
+    {
+        <a href="@ViewBag.ReturnUrl" class="btn-action btn-edit">رجوع</a>
+    }
+    else
+    {
+        <a asp-action="Index" class="btn-action btn-edit">رجوع</a>
+    }
+</div>
+
+<div class="form-card" style="margin: 0 auto;">
+    <form asp-action="Assign" asp-route-returnUrl="@ViewBag.ReturnUrl" method="post">
+        @Html.AntiForgeryToken()
+
+        <label class="form-label-dash">المشروع</label>
+        <select asp-for="ProjectId" class="form-control-dash" asp-items="ViewBag.Projects">
+            <option value="">-- اختر المشروع --</option>
+        </select>
+        <span asp-validation-for="ProjectId" class="text-danger-dash"></span>
+
+        <label class="form-label-dash">الموظف</label>
+        <select asp-for="GivenToUserId" class="form-control-dash" asp-items="ViewBag.Users">
+            <option value="">-- اختر الموظف --</option>
+        </select>
+        <span asp-validation-for="GivenToUserId" class="text-danger-dash"></span>
+
+        <label class="form-label-dash">المبلغ</label>
+        <input asp-for="Amount" class="form-control-dash" type="number" step="0.01" placeholder="0.00" />
+        <span asp-validation-for="Amount" class="text-danger-dash"></span>
+
+        <div style="display:flex; gap:12px; margin-top:8px;">
+            <button type="submit" class="btn-gold">إضافة</button>
+            @if (!string.IsNullOrEmpty(ViewBag.ReturnUrl as string))
+            {
+                <a href="@ViewBag.ReturnUrl" class="btn-action btn-edit">رجوع</a>
+            }
+            else
+            {
+                <a asp-action="Index" class="btn-action btn-edit">رجوع</a>
+            }
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

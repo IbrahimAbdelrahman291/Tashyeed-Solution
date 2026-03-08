@@ -1,0 +1,125 @@
+﻿@model IEnumerable<WorkerRequestListVM>
+@{
+    ViewData["Title"] = "طلبات العمالة";
+}
+<div class="page-header">
+    <h2 class="page-title">طلبات العمالة</h2>
+    <a asp-controller="ProjectManagerDashboard" asp-action="Index" class="btn-action btn-edit">رجوع</a>
+</div>
+
+<div class="dash-card">
+    <div style=" gap:12px; padding: 16px 0 20px 0; flex-wrap: wrap; align-items: center;">
+        <input type="date" id="dateFilter"
+               class="form-control-dash" style="max-width: 200px; height: 42px;"
+               onchange="filterTable()" />
+        <button onclick="clearFilters()"
+                style="background: transparent; border: 1px solid var(--border); color: var(--text-muted);
+                       height: 42px; padding: 0 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem;
+                       transition: all 0.2s;margin-top: 0;line-height: 42px;"
+                onmouseover="this.style.borderColor='var(--gold)'; this.style.color='var(--gold)'"
+                onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-muted)'">
+            ✕ مسح الفلتر
+        </button>
+    </div>
+
+    <table class="dash-table" id="requestsTable">
+        <thead>
+            <tr>
+                <th>المشروع</th>
+                <th>مقدم من</th>
+                <th>العدد</th>
+                <th>النوع</th>
+                <th>الحالة</th>
+                <th>التاريخ</th>
+                <th>الإجراءات</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            @foreach (var req in Model)
+            {
+                <tr>
+                    <td>@req.ProjectName</td>
+                    <td>@req.RequestedByName</td>
+                    <td>@req.NumberOfWorkers</td>
+                    <td>
+                        @if (req.WorkerType == WorkerType.Daily)
+                        {
+                            <span>يومية</span>
+                        }
+                        else
+                        {
+                            <span>بالمشروع</span>
+                        }
+                    </td>
+                    <td>
+                        @switch (req.Status)
+                        {
+                            case RequestStatus.Pending:
+                                <span class="badge-onhold">معلق</span>
+                                break;
+                            case RequestStatus.Approved:
+                                <span class="badge-active">موافق</span>
+                                break;
+                            case RequestStatus.Rejected:
+                                <span class="badge-completed">مرفوض</span>
+                                break;
+                        }
+                    </td>
+                    <td data-date="@req.CreatedAt.ToString("yyyy-MM-dd")">@req.CreatedAt.ToString("yyyy-MM-dd")</td>
+                    <td>
+                        @if (req.Status == RequestStatus.Pending)
+                        {
+                            <form asp-action="Approve" method="post" style="display:inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="requestId" value="@req.Id" />
+                                <button type="submit" class="btn-action btn-details">موافقة</button>
+                            </form>
+                            <form asp-action="Reject" method="post" style="display:inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="requestId" value="@req.Id" />
+                                <button type="submit" class="btn-action btn-delete"
+                                        onclick="return confirm('متأكد إنك عايز ترفض الطلب ده؟')">
+                                    رفض
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span style="color: var(--text-muted);">-</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <p id="noResults" style="display:none; color: var(--text-muted); padding: 20px; text-align:center;">
+        مفيش نتائج
+    </p>
+</div>
+
+<script>
+    function filterTable() {
+        const date = document.getElementById('dateFilter').value;
+        const rows = document.querySelectorAll('#tableBody tr');
+        let count = 0;
+
+        rows.forEach(row => {
+            const rowDate = row.cells[5].getAttribute('data-date');
+            const matchDate = !date || rowDate === date;
+
+            if (matchDate) {
+                row.style.display = '';
+                count++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        document.getElementById('noResults').style.display = count === 0 ? 'block' : 'none';
+    }
+
+    function clearFilters() {
+        document.getElementById('dateFilter').value = '';
+        filterTable();
+    }
+</script>

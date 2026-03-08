@@ -1,0 +1,27 @@
+﻿@{
+    ViewData["Title"] = "لوحة تحكم المهندس";
+    Layout = "_DashboardLayout";
+}
+
+<div class="page-header">
+    <h2 class="page-title">لوحة تحكم المهندس</h2>
+</div>
+
+<div>
+    <h3 style="font-family: 'Playfair Display', serif; color: var(--white); margin-bottom: 20px;">وصول سريع</h3>
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+
+        <a asp-controller="Procurement" asp-action="MyRequests" style="text-decoration: none;">
+            <div class="dash-card" style="padding: 24px; display: flex; align-items: center; gap: 16px; cursor: pointer;">
+                <div style="width: 48px; height: 48px; background: rgba(201,168,76,0.1); border: 1px solid var(--border); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+                    🛒
+                </div>
+                <div>
+                    <p style="color: var(--white); font-weight: 600; margin-bottom: 4px;">طلباتي</p>
+                    <p style="color: var(--text-muted); font-size: 0.85rem;">عرض وإضافة طلبات الشراء</p>
+                </div>
+            </div>
+        </a>
+
+    </div>
+</div>

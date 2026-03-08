@@ -1,0 +1,109 @@
+﻿@model IEnumerable<CustodyListVM>
+@{
+    ViewData["Title"] = "العهد";
+}
+<div class="page-header">
+    <h2 class="page-title">العهد</h2>
+    <div style="display:flex; gap:12px;">
+        <a asp-controller="ProjectManagerDashboard" asp-action="Index" class="btn-action btn-edit">رجوع</a>
+        <a asp-action="Assign" class="btn-gold">+ عهدة جديدة</a>
+    </div>
+</div>
+
+<div class="dash-card">
+    <div style=" gap:12px; padding: 16px 0 20px 0; flex-wrap: wrap; align-items: center;">
+        <input type="text" id="searchInput" placeholder="ابحث باسم الشخص..."
+               class="form-control-dash" style="max-width: 300px; height: 42px;"
+               onkeyup="filterTable()" />
+        <input type="date" id="dateFilter"
+               class="form-control-dash" style="max-width: 200px; height: 42px;"
+               onchange="filterTable()" />
+        <button onclick="clearFilters()"
+                style="background: transparent; border: 1px solid var(--border); color: var(--text-muted);
+                       height: 42px; padding: 0 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem;
+                       transition: all 0.2s;margin-top: 0;line-height: 42px;"
+                onmouseover="this.style.borderColor='var(--gold)'; this.style.color='var(--gold)'"
+                onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-muted)'">
+            ✕ مسح الفلتر
+        </button>
+    </div>
+
+    <table class="dash-table" id="custodyTable">
+        <thead>
+            <tr>
+                <th>المشروع</th>
+                <th>من</th>
+                <th>إلى</th>
+                <th>المبلغ</th>
+                <th>المتبقي</th>
+                <th>الحالة</th>
+                <th>التاريخ</th>
+                <th>تاريخ التأكيد</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            @foreach (var custody in Model)
+            {
+                <tr>
+                    <td>@custody.ProjectName</td>
+                    <td>@custody.GivenByName</td>
+                    <td>@custody.GivenToName</td>
+                    <td>@custody.Amount.ToString("N2") SAR</td>
+                    <td>@custody.RemainingAmount.ToString("N2") SAR</td>
+                    <td>
+                        @switch (custody.Status)
+                        {
+                            case CustodyStatus.Pending:
+                                <span class="badge-onhold">معلقة</span>
+                                break;
+                            case CustodyStatus.Confirmed:
+                                <span class="badge-active">مؤكدة</span>
+                                break;
+                            case CustodyStatus.Rejected:
+                                <span class="badge-completed">مرفوضة</span>
+                                break;
+                        }
+                    </td>
+                    <td data-date="@custody.CreatedAt.ToString("yyyy-MM-dd")">@custody.CreatedAt.ToString("yyyy-MM-dd")</td>
+                    <td>@(custody.ConfirmedAt?.ToString("yyyy-MM-dd") ?? "-")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <p id="noResults" style="display:none; color: var(--text-muted); padding: 20px; text-align:center;">
+        مفيش نتائج
+    </p>
+</div>
+
+<script>
+    function filterTable() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const date = document.getElementById('dateFilter').value;
+        const rows = document.querySelectorAll('#tableBody tr');
+        let count = 0;
+
+        rows.forEach(row => {
+            const givenBy = row.cells[1].textContent.toLowerCase();
+            const givenTo = row.cells[2].textContent.toLowerCase();
+            const rowDate = row.cells[6].getAttribute('data-date');
+
+            const matchSearch = !search || givenBy.includes(search) || givenTo.includes(search);
+            const matchDate = !date || rowDate === date;
+
+            if (matchSearch && matchDate) {
+                row.style.display = '';
+                count++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        document.getElementById('noResults').style.display = count === 0 ? 'block' : 'none';
+    }
+
+    function clearFilters() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('dateFilter').value = '';
+        filterTable();
+    }
+</script>

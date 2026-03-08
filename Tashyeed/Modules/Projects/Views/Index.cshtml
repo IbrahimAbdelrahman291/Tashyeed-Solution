@@ -1,0 +1,95 @@
+﻿@model IEnumerable<Tashyeed.Web.Modules.Projects.ViewModels.ProjectDetailsVM>
+@{
+    ViewData["Title"] = "المشاريع";
+}
+<div class="page-header">
+    <h2 class="page-title">المشاريع</h2>
+    <div style="display:flex; gap:12px;">
+        <a asp-controller="AdminDashboard" asp-action="Index" class="btn-action btn-edit">رجوع</a>
+        <a asp-action="Create" class="btn-gold">+ مشروع جديد</a>
+    </div>
+</div>
+
+<div class="dash-card">
+    <div style="padding: 16px 0 20px 0;">
+        <input type="text" id="searchInput" placeholder="ابحث باسم المشروع أو الموقع..."
+               class="form-control-dash" style="max-width: 400px;"
+               onkeyup="filterTable()" />
+    </div>
+    <table class="dash-table" id="projectsTable">
+        <thead>
+            <tr>
+                <th>الاسم</th>
+                <th>الموقع</th>
+                <th>الميزانية</th>
+                <th>المصروف</th>
+                <th>المتبقي</th>
+                <th>الحالة</th>
+                <th>تاريخ البداية</th>
+                <th>الإجراءات</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            @foreach (var project in Model)
+            {
+                <tr>
+                    <td>@project.Name</td>
+                    <td>@project.Location</td>
+                    <td>@project.Budget.ToString("N2")</td>
+                    <td>@project.SpentAmount.ToString("N2")</td>
+                    <td>@project.RemainingBudget.ToString("N2")</td>
+                    <td>
+                        @switch (project.Status)
+                        {
+                            case Tashyeed.Shared.Enums.ProjectStatus.Active:
+                                <span class="badge-active">نشط</span>
+                                break;
+                            case Tashyeed.Shared.Enums.ProjectStatus.OnHold:
+                                <span class="badge-onhold">معلق</span>
+                                break;
+                            case Tashyeed.Shared.Enums.ProjectStatus.Completed:
+                                <span class="badge-completed">منتهي</span>
+                                break;
+                        }
+                    </td>
+                    <td>@project.StartDate.ToString("yyyy-MM-dd")</td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@project.Id" class="btn-action btn-details">تفاصيل</a>
+                        <a asp-action="Edit" asp-route-id="@project.Id" class="btn-action btn-edit">تعديل</a>
+                        <form asp-action="Delete" asp-route-id="@project.Id" method="post" style="display:inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn-action btn-delete"
+                                    onclick="return confirm('متأكد إنك عايز تمسح المشروع ده؟')">
+                                حذف
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <p id="noResults" style="display:none; color: var(--text-muted); padding: 20px; text-align:center;">
+        مفيش نتائج
+    </p>
+</div>
+
+<script>
+    function filterTable() {
+        const input = document.getElementById('searchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('#tableBody tr');
+        let count = 0;
+
+        rows.forEach(row => {
+            const name = row.cells[0].textContent.toLowerCase();
+            const location = row.cells[1].textContent.toLowerCase();
+            if (name.includes(input) || location.includes(input)) {
+                row.style.display = '';
+                count++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        document.getElementById('noResults').style.display = count === 0 ? 'block' : 'none';
+    }
+</script>

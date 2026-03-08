@@ -1,0 +1,73 @@
+﻿@model IEnumerable<Tashyeed.Infrastructure.Entities.Project>
+@{
+    ViewData["Title"] = "المشاريع";
+}
+<div class="page-header">
+    <h2 class="page-title">المشاريع</h2>
+    <a asp-controller="AccountingManagerDashboard" asp-action="Index" class="btn-action btn-edit">رجوع</a>
+</div>
+<div class="dash-card">
+    <div style="gap:12px; padding: 16px 0 20px 0;">
+        <input type="text" id="searchInput" placeholder="ابحث باسم المشروع..."
+               class="form-control-dash" style="max-width: 300px; height: 42px; display:inline-block; margin-left: 12px;"
+               onkeyup="filterTable()" />
+        
+    </div>
+    <table class="dash-table">
+        <thead>
+            <tr>
+                <th>اسم المشروع</th>
+                <th>الموقع</th>
+                <th>الميزانية</th>
+                <th>المصروف</th>
+                <th>المتبقي</th>
+                <th>الحالة</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            @foreach (var project in Model)
+            {
+                <tr>
+                    <td>@project.Name</td>
+                    <td>@project.Location</td>
+                    <td>@project.Budget.ToString("N2") SAR</td>
+                    <td>@project.SpentAmount.ToString("N2") SAR</td>
+                    <td>@((project.Budget - project.SpentAmount).ToString("N2")) SAR</td>
+                    <td>
+                        @switch (project.Status)
+                        {
+                            case Tashyeed.Shared.Enums.ProjectStatus.Active:
+                                <span class="badge-active">نشط</span>
+                                break;
+                            case Tashyeed.Shared.Enums.ProjectStatus.OnHold:
+                                <span class="badge-onhold">معلق</span>
+                                break;
+                            case Tashyeed.Shared.Enums.ProjectStatus.Completed:
+                                <span class="badge-completed">منتهي</span>
+                                break;
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <p id="noResults" style="display:none; color: var(--text-muted); padding: 20px; text-align:center;">مفيش نتائج</p>
+</div>
+
+<script>
+    function filterTable() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('#tableBody tr');
+        let count = 0;
+        rows.forEach(row => {
+            const name = row.cells[0].textContent.toLowerCase();
+            if (!search || name.includes(search)) { row.style.display = ''; count++; }
+            else row.style.display = 'none';
+        });
+        document.getElementById('noResults').style.display = count === 0 ? 'block' : 'none';
+    }
+    function clearFilters() {
+        document.getElementById('searchInput').value = '';
+        filterTable();
+    }
+</script>

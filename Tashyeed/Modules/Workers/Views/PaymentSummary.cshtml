@@ -1,0 +1,75 @@
+﻿@model WorkerPaymentSummaryVM
+
+@{
+    ViewData["Title"] = "صرف العامل";
+}
+
+<div class="page-header">
+    <h2 class="page-title">صرف - @Model.WorkerName</h2>
+    <a asp-action="MyWorkers" class="btn-action btn-edit">رجوع</a>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);
+                    color: #f87171; padding: 12px 20px; border-radius: 8px; margin-bottom: 16px;">
+        @TempData["Error"]
+    </div>
+}
+
+<div class="form-card" style="margin: 0 auto;">
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+        <div>
+            <span class="form-label-dash">أيام الحضور غير المصروفة</span>
+            <p style="color: var(--white); font-size: 1.1rem; font-weight: 600;">@Model.DaysPresent يوم</p>
+        </div>
+        <div>
+            <span class="form-label-dash">سعر اليومية</span>
+            <p style="color: var(--gold); font-size: 1.1rem; font-weight: 600;">@Model.DailyRate.ToString("N2") SAR</p>
+        </div>
+        <div>
+            <span class="form-label-dash">إجمالي ساعات الأوفر تايم</span>
+            <p style="color: var(--white); font-size: 1.1rem; font-weight: 600;">@Model.TotalOvertimeHours ساعة</p>
+        </div>
+        <div>
+            <span class="form-label-dash">سعر ساعة الأوفر تايم</span>
+            <p style="color: var(--gold); font-size: 1.1rem; font-weight: 600;">@Model.OvertimeHourRate.ToString("N2") SAR</p>
+        </div>
+    </div>
+
+    <div style="border-top: 1px solid var(--border); padding-top: 24px; margin-bottom: 24px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <div>
+                <span class="form-label-dash">إجمالي اليوميات</span>
+                <p style="color: var(--white); font-size: 1.2rem; font-weight: 600;">@Model.TotalDailyAmount.ToString("N2") SAR</p>
+            </div>
+            <div>
+                <span class="form-label-dash">إجمالي الأوفر تايم</span>
+                <p style="color: var(--white); font-size: 1.2rem; font-weight: 600;">@Model.TotalOvertimeAmount.ToString("N2") SAR</p>
+            </div>
+        </div>
+    </div>
+
+    <div style="background: rgba(201,168,76,0.1); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 24px;">
+        <span class="form-label-dash">الإجمالي الكلي</span>
+        <p style="font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--gold);">@Model.TotalAmount.ToString("N2") SAR</p>
+    </div>
+
+    @if (Model.DaysPresent > 0)
+    {
+        <form asp-action="PayWorker" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="workerId" value="@Model.WorkerId" />
+            <button type="submit" class="btn-gold"
+                    onclick="return confirm('متأكد إنك عايز تصرف @Model.TotalAmount.ToString("N2") SAR للعامل ده؟')">
+                تأكيد الصرف
+            </button>
+        </form>
+    }
+    else
+    {
+        <p style="color: var(--text-muted);">مفيش أيام حضور غير مصروفة لحد دلوقتي</p>
+    }
+
+</div>

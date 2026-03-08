@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Tashyeed</title>
+    <link rel="icon" type="image/png" href="~/images/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+</head>
+<body>
+    <nav class="dash-navbar">
+        <a class="dash-brand" href="/">
+            <img src="~/images/logo.png" style="height: 36px;" />
+        </a>
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <a asp-controller="Profile" asp-action="Index"
+               style="color: var(--text-muted); text-decoration: none; font-size: 0.9rem;
+                      transition: color 0.2s;"
+               onmouseover="this.style.color='var(--gold)'"
+               onmouseout="this.style.color='var(--text-muted)'">
+                👤 @User.Identity.Name
+            </a>
+            <form asp-controller="Auth" asp-action="Logout" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn-logout">تسجيل الخروج</button>
+            </form>
+        </div>
+    </nav>
+    <div class="dash-wrapper">
+        @RenderBody()
+    </div>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

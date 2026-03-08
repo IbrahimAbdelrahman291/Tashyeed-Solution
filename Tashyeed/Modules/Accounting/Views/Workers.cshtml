@@ -1,0 +1,128 @@
+﻿@model IEnumerable<Tashyeed.Infrastructure.Entities.Worker>
+@{
+    ViewData["Title"] = "العمالة";
+}
+<div class="page-header">
+    <h2 class="page-title">العمالة</h2>
+    <a asp-controller="AccountingManagerDashboard" asp-action="Index" class="btn-action btn-edit">رجوع</a>
+</div>
+
+<div style="gap:12px; padding: 0 0 20px 0;">
+    <select id="monthFilter" class="form-control-dash" style="max-width: 160px; height: 42px; display:inline-block; margin-left: 12px;" onchange="filterRows()">
+        <option value="">كل الشهور</option>
+        <option value="01">يناير</option>
+        <option value="02">فبراير</option>
+        <option value="03">مارس</option>
+        <option value="04">أبريل</option>
+        <option value="05">مايو</option>
+        <option value="06">يونيو</option>
+        <option value="07">يوليو</option>
+        <option value="08">أغسطس</option>
+        <option value="09">سبتمبر</option>
+        <option value="10">أكتوبر</option>
+        <option value="11">نوفمبر</option>
+        <option value="12">ديسمبر</option>
+    </select>
+    <input type="number" id="yearFilter" placeholder="السنة" min="2000" max="2099"
+           class="form-control-dash" style="max-width: 120px; height: 42px; display:inline-block; margin-left: 12px;"
+           onkeyup="filterRows()" onchange="filterRows()" />
+    <button onclick="clearFilters()" style="background: transparent; border: 1px solid var(--border); color: var(--text-muted); height: 42px; padding: 0 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s;"
+            onmouseover="this.style.borderColor='var(--gold)'; this.style.color='var(--gold)'"
+            onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-muted)'">
+        ✕ مسح الفلتر
+    </button>
+</div>
+
+@foreach (var worker in Model)
+{
+    var paidAttendances = worker.DailyAttendances.Where(da => da.IsPresent).ToList();
+    var totalPaid = (paidAttendances.Count * worker.DailyRate) +
+                    (paidAttendances.Sum(da => da.OvertimeHours) * worker.OvertimeHourRate);
+
+    <div class="dash-card" style="margin-bottom: 24px; padding: 0; overflow: hidden;">
+        <div style="background: rgba(201,168,76,0.08); border-bottom: 1px solid var(--border); padding: 20px 24px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <div style="width: 44px; height: 44px; background: rgba(201,168,76,0.15); border: 1px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">👷</div>
+                <div>
+                    <p style="color: var(--white); font-weight: 700; font-size: 1.05rem; margin-bottom: 2px;">@worker.Name</p>
+                    <p style="color: var(--text-muted); font-size: 0.82rem;">@worker.Project.Name</p>
+                </div>
+            </div>
+            <div style="display: flex; gap: 32px; align-items: center;">
+                <div style="text-align: center;">
+                    <p class="form-label-dash" style="margin-bottom: 2px;">أيام الحضور</p>
+                    <p style="color: var(--white); font-weight: 600;">@paidAttendances.Count يوم</p>
+                </div>
+                <div style="text-align: center;">
+                    <p class="form-label-dash" style="margin-bottom: 2px;">سعر اليومية</p>
+                    <p style="color: var(--white); font-weight: 600;">@worker.DailyRate.ToString("N2") SAR</p>
+                </div>
+                <div style="text-align: center;">
+                    <p class="form-label-dash" style="margin-bottom: 2px;">إجمالي المدفوع</p>
+                    <p style="color: var(--gold); font-weight: 700; font-size: 1.1rem;">@totalPaid.ToString("N2") SAR</p>
+                </div>
+            </div>
+        </div>
+
+        @if (paidAttendances.Any())
+        {
+            <div style="padding: 16px 24px;">
+                <table class="dash-table attendance-table">
+                    <thead>
+                        <tr>
+                            <th>تاريخ الحضور</th>
+                            <th>اليومية</th>
+                            <th>ساعات الأوفر تايم</th>
+                            <th>قيمة الأوفر تايم</th>
+                            <th>إجمالي اليوم</th>
+                            <th>تاريخ الصرف</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var attendance in paidAttendances.OrderBy(a => a.AttendanceDate))
+                        {
+                            var overtimeAmount = attendance.OvertimeHours * worker.OvertimeHourRate;
+                            var dayTotal = worker.DailyRate + overtimeAmount;
+                            <tr data-date="@attendance.AttendanceDate.ToString("yyyy-MM-dd")">
+                                <td>@attendance.AttendanceDate.ToString("yyyy-MM-dd")</td>
+                                <td>@worker.DailyRate.ToString("N2") SAR</td>
+                                <td>@attendance.OvertimeHours ساعة</td>
+                                <td>@overtimeAmount.ToString("N2") SAR</td>
+                                <td style="color: var(--gold); font-weight: 600;">@dayTotal.ToString("N2") SAR</td>
+                                <td style="color: var(--text-muted);">@(attendance.PaidAt?.ToString("yyyy-MM-dd") ?? "-")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div style="padding: 24px; text-align: center;">
+                <p style="color: var(--text-muted);">مفيش مدفوعات لحد دلوقتي</p>
+            </div>
+        }
+    </div>
+}
+
+<script>
+    function filterRows() {
+        const month = document.getElementById('monthFilter').value;
+        const year = document.getElementById('yearFilter').value;
+
+        document.querySelectorAll('.attendance-table tbody tr').forEach(row => {
+            const rowDate = row.getAttribute('data-date');
+            const rowMonth = rowDate ? rowDate.substring(5, 7) : '';
+            const rowYear = rowDate ? rowDate.substring(0, 4) : '';
+            const matchMonth = !month || rowMonth === month;
+            const matchYear = !year || rowYear === year;
+            row.style.display = (matchMonth && matchYear) ? '' : 'none';
+        });
+    }
+
+    function clearFilters() {
+        document.getElementById('monthFilter').value = '';
+        document.getElementById('yearFilter').value = '';
+        filterRows();
+    }
+</script>
