@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Tashyeed.Infrastructure.Identity;
@@ -9,6 +10,7 @@ using Tashyeed.Web.Modules.ProjectAssignment.ViewModels;
 
 namespace Tashyeed.Web.Modules.ProjectAssignment.Controllers
 {
+    [Authorize(Roles = RoleNames.Admin)]
     public class ProjectAssignmentController : Controller
     {
         private readonly IProjectAssignmentService _assignmentService;
