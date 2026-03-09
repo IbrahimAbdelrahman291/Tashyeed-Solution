@@ -50,7 +50,7 @@ namespace Tashyeed.Web.Modules.ProjectAssignment.Controllers
             var result = await _assignmentService.AssignUserAsync(vm);
             if (!result)
             {
-                ModelState.AddModelError(string.Empty, "الموظف ده متعين على المشروع ده بالفعل");
+                TempData["Message"] = "هذا الموظف تم تعينه بالفعل في المشروع";
                 await PopulateViewBags();
                 return View(vm);
             }

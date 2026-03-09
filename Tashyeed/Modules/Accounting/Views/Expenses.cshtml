@@ -50,13 +50,19 @@
                 <tr>
                     <td>@expense.Project.Name</td>
                     <td>@(expense.SubmittedBy.FullName ?? expense.SubmittedBy.Email)</td>
-                    <td>@if (expense.Type == Tashyeed.Shared.Enums.ExpenseType.Food) {
-                    <span>🍔 أكل وشرب</span>
-                } else
-                {
-
-                    <span>🚗 موصلات</span>
-                }
+                    <td>
+                        @if (expense.Type == ExpenseType.Food)
+                        {
+                            <span>🍔 أكل وشرب</span>
+                        }
+                        else if (expense.Type == ExpenseType.Transportation)
+                        {
+                            <span>🚗 موصلات</span>
+                        }
+                        else if (expense.Type == ExpenseType.housing)
+                        {
+                            <span>🏠 سكن</span>
+                        }
 </td>
                 <td>@expense.Amount.ToString("N2") SAR</td>
                 <td>

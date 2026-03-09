@@ -26,6 +26,18 @@ namespace Tashyeed.Web.Modules.Workers.Controllers
         public async Task<IActionResult> Requests()
         {
             var requests = await _workerService.GetAllRequestsAsync();
+
+            if (User.IsInRole(RoleNames.ProjectManager))
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+                var projectIds = _context.ProjectAssignments
+                    .Where(pa => pa.UserId == userId)
+                    .Select(pa => pa.ProjectId)
+                    .ToList();
+
+                requests = requests.Where(r => projectIds.Contains(r.ProjectId));
+            }
+
             return View(requests);
         }
 
@@ -141,11 +153,12 @@ namespace Tashyeed.Web.Modules.Workers.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
             var success = await _workerService.AddDailyAttendanceAsync(vm, userId);
 
-            if (success)
+            if (success && vm.IsPresent == true)
                 TempData["Success"] = "تم تسجيل الحضور بنجاح ✅";
+            else if (success && vm.IsPresent == false)
+                TempData["Error"] = "لم يتم تسجيل حضور هذا اليوم لعدم تسجيل العامل حاضر في هذا اليوم";
             else
-                TempData["Error"] = "الحضور بتاع اليوم ده مسجل بالفعل";
-
+                TempData["Error"] = "العامل متسجل حضور في هذا اليوم بالفعل";
             return RedirectToAction(nameof(MyWorkers));
         }
 

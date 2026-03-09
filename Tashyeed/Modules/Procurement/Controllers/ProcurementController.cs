@@ -26,6 +26,18 @@ namespace Tashyeed.Web.Modules.Procurement.Controllers
         public async Task<IActionResult> Index()
         {
             var requests = await _procurementService.GetAllAsync();
+
+            if (User.IsInRole(RoleNames.ProcurementManager))
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+                var projectIds = _context.ProjectAssignments
+                    .Where(pa => pa.UserId == userId)
+                    .Select(pa => pa.ProjectId)
+                    .ToList();
+
+                requests = requests.Where(r => projectIds.Contains(r.ProjectId));
+            }
+
             return View(requests);
         }
 

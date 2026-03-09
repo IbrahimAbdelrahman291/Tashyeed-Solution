@@ -47,9 +47,13 @@
                         {
                             <span>🍔 أكل وشرب</span>
                         }
-                        else
+                        else if (expense.Type == ExpenseType.Transportation)
                         {
                             <span>🚗 موصلات</span>
+                        }
+                        else if (expense.Type == ExpenseType.housing)
+                        {
+                            <span>🏠 سكن</span>
                         }
                     </td>
                     <td>@expense.Amount.ToString("N2") SAR</td>

@@ -89,22 +89,55 @@ namespace Tashyeed.Web.Modules.CustodyModule.Controllers
 
         private void PopulateViewBags()
         {
-            ViewBag.Projects = _context.Projects
-                .Select(p => new SelectListItem
-                {
-                    Value = p.Id.ToString(),
-                    Text = p.Name
-                }).ToList();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
-            ViewBag.Users = _context.ProjectAssignments
-                .Where(pa => pa.Role == RoleNames.ProcurementManager || pa.Role == RoleNames.Supervisor)
-                .Select(pa => new SelectListItem
-                {
-                    Value = pa.UserId,
-                    Text = pa.User.FullName ?? pa.User.Email
-                })
-                .Distinct()
-                .ToList();
+            if (User.IsInRole(RoleNames.ProjectManager))
+            {
+                // بيجيب بس المشاريع اللي مدير المشروع متعين فيها
+                var projectIds = _context.ProjectAssignments
+                    .Where(pa => pa.UserId == userId)
+                    .Select(pa => pa.ProjectId)
+                    .ToList();
+
+                ViewBag.Projects = _context.Projects
+                    .Where(p => projectIds.Contains(p.Id))
+                    .Select(p => new SelectListItem
+                    {
+                        Value = p.Id.ToString(),
+                        Text = p.Name
+                    }).ToList();
+
+                // بيجيب بس المستخدمين اللي في نفس المشاريع بتاعته
+                ViewBag.Users = _context.ProjectAssignments
+                    .Where(pa => projectIds.Contains(pa.ProjectId)
+                        && (pa.Role == RoleNames.ProcurementManager || pa.Role == RoleNames.Supervisor))
+                    .Select(pa => new SelectListItem
+                    {
+                        Value = pa.UserId,
+                        Text = pa.User.FullName ?? pa.User.Email
+                    })
+                    .Distinct()
+                    .ToList();
+            }
+            else
+            {
+                ViewBag.Projects = _context.Projects
+                    .Select(p => new SelectListItem
+                    {
+                        Value = p.Id.ToString(),
+                        Text = p.Name
+                    }).ToList();
+
+                ViewBag.Users = _context.ProjectAssignments
+                    .Where(pa => pa.Role == RoleNames.ProcurementManager || pa.Role == RoleNames.Supervisor)
+                    .Select(pa => new SelectListItem
+                    {
+                        Value = pa.UserId,
+                        Text = pa.User.FullName ?? pa.User.Email
+                    })
+                    .Distinct()
+                    .ToList();
+            }
         }
     }
 }
